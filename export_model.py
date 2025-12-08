@@ -17,13 +17,44 @@ def main():
         load_in_4bit = load_in_4bit,
     )
 
-    print("Saving to GGUF format (q4_k_m)...")
-    # This will merge the LoRA adapters into the base model and convert to GGUF
-    # It saves to the current directory
-    model.save_pretrained_gguf("qwen3_8b_finetuned", tokenizer, quantization_method = "q4_k_m")
+    # Save the merged model first
+    print("Merging and saving model to 'merged_model'...")
+    model.save_pretrained_merged("merged_model", tokenizer, save_method = "merged_16bit")
+
+    print("Converting to GGUF using llama.cpp...")
     
-    print("Export complete!")
-    print("You should see a file like 'qwen3_8b_finetuned-unsloth.Q4_K_M.gguf'")
+    # Define paths
+    llama_cpp_dir = "llama.cpp"
+    merged_model_dir = "merged_model"
+    output_gguf = "qwen3_8b_finetuned.gguf"
+    quantized_gguf = "qwen3_8b_finetuned-Q4_K_M.gguf"
+
+    # 1. Convert HF to GGUF (fp16)
+    import subprocess
+    
+    convert_cmd = [
+        "python3", 
+        f"{llama_cpp_dir}/convert_hf_to_gguf.py", 
+        merged_model_dir, 
+        "--outfile", output_gguf,
+        "--outtype", "f16"
+    ]
+    
+    print(f"Running: {' '.join(convert_cmd)}")
+    subprocess.run(convert_cmd, check=True)
+    
+    # 2. Quantize to Q4_K_M
+    quantize_cmd = [
+        f"{llama_cpp_dir}/build/bin/llama-quantize",
+        output_gguf,
+        quantized_gguf,
+        "Q4_K_M"
+    ]
+    
+    print(f"Running: {' '.join(quantize_cmd)}")
+    subprocess.run(quantize_cmd, check=True)
+    
+    print(f"Export complete! File saved as: {quantized_gguf}")
 
 if __name__ == "__main__":
     main()
