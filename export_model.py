@@ -17,64 +17,50 @@ def main():
         load_in_4bit = load_in_4bit,
     )
 
-    # Save the merged model first
-    print("Merging and saving model to 'merged_model'...")
-    model.save_pretrained_merged("merged_model", tokenizer, save_method = "merged_16bit")
-    
-    # Explicitly save tokenizer to the same directory
-    print("Saving tokenizer to 'merged_model'...")
-    tokenizer.save_pretrained("merged_model")
-
-    # DEBUG: List files in merged_model
-    print("Files in merged_model:")
+    # --- FIX: Prepare environment for Unsloth's internal exporter ---
     import os
-    print(os.listdir("merged_model"))
+    import shutil
+    import unsloth_zoo.llama_cpp
 
-    # Fix for Qwen tokenizer: Ensure it doesn't look like SentencePiece
-    # If tokenizer.model exists but it's not needed, rename it.
-    if os.path.exists("merged_model/tokenizer.model"):
-        print("Renaming tokenizer.model to avoid confusion...")
-        os.rename("merged_model/tokenizer.model", "merged_model/tokenizer.model.bak")
+    print("Patching Unsloth environment checks...")
 
-    print("Converting to GGUF using llama.cpp...")
-    
-    # Define paths
-    llama_cpp_dir = "llama.cpp"
-    merged_model_dir = "merged_model"
-    output_gguf = "qwen3_8b_finetuned.gguf"
-    quantized_gguf = "qwen3_8b_finetuned-Q4_K_M.gguf"
+    # 1. Bypass internet check
+    def mock_do_we_need_sudo():
+        return False
+    unsloth_zoo.llama_cpp.do_we_need_sudo = mock_do_we_need_sudo
 
-    # 1. Convert HF to GGUF (fp16)
-    import subprocess
+    # 2. Symlink binaries so Unsloth finds them
+    # Unsloth looks for 'quantize' or 'llama-quantize' in the llama.cpp folder
+    cwd = os.getcwd()
+    llama_cpp_dir = os.path.join(cwd, "llama.cpp")
+    build_bin_dir = os.path.join(llama_cpp_dir, "build", "bin")
     
-    convert_cmd = [
-        "python3", 
-        f"{llama_cpp_dir}/convert_hf_to_gguf.py", 
-        merged_model_dir, 
-        "--outfile", output_gguf,
-        "--outtype", "f16",
-        # Force BPE tokenizer for Qwen
-        # "--vocab-type", "bpe" # Sometimes auto-detection fails, but let's try without first if it was failing before. 
-        # Actually, Qwen uses a specific BPE. Let's try to trust the script but maybe the vocab files are still wrong.
-        # Let's try to use the 'qwen' specific conversion if available or just ensure tokenizer.json is used.
-        # The script usually auto-detects based on tokenizer.json.
-    ]
+    binaries = ["llama-quantize", "llama-cli", "llama-server"]
+    for binary in binaries:
+        src = os.path.join(build_bin_dir, binary)
+        dst = os.path.join(llama_cpp_dir, binary)
+        
+        # Also try short names (quantize, main) just in case
+        short_name = binary.replace("llama-", "")
+        dst_short = os.path.join(llama_cpp_dir, short_name)
+
+        if os.path.exists(src):
+            if not os.path.exists(dst):
+                print(f"Symlinking {src} -> {dst}")
+                os.symlink(src, dst)
+            if not os.path.exists(dst_short):
+                print(f"Symlinking {src} -> {dst_short}")
+                os.symlink(src, dst_short)
     
-    print(f"Running: {' '.join(convert_cmd)}")
-    subprocess.run(convert_cmd, check=True)
-    
-    # 2. Quantize to Q4_K_M
-    quantize_cmd = [
-        f"{llama_cpp_dir}/build/bin/llama-quantize",
-        output_gguf,
-        quantized_gguf,
-        "Q4_K_M"
-    ]
-    
-    print(f"Running: {' '.join(quantize_cmd)}")
-    subprocess.run(quantize_cmd, check=True)
-    
-    print(f"Export complete! File saved as: {quantized_gguf}")
+    # 3. Use Unsloth's exporter
+    print("Saving to GGUF format (q4_k_m) using Unsloth...")
+    try:
+        model.save_pretrained_gguf("qwen3_8b_finetuned", tokenizer, quantization_method = "q4_k_m")
+        print("Export complete!")
+    except Exception as e:
+        print(f"Unsloth export failed: {e}")
+        print("Falling back to manual conversion is not recommended due to tokenizer issues.")
+        raise e
 
 if __name__ == "__main__":
     main()
