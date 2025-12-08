@@ -21,13 +21,14 @@ def main():
     print("Merging and saving model to 'merged_model'...")
     model.save_pretrained_merged("merged_model", tokenizer, save_method = "merged_16bit")
     
-    # Explicitly save tokenizer to the same directory to ensure it's found
+    # Explicitly save tokenizer to the same directory
     print("Saving tokenizer to 'merged_model'...")
     tokenizer.save_pretrained("merged_model")
-    
-    # Ensure config.json is also correct (sometimes Unsloth saves it slightly differently)
-    # But usually save_pretrained_merged handles it.
 
+    # Qwen uses tokenizer.json, but sometimes convert_hf_to_gguf looks for tokenizer.model
+    # We will ensure all tokenizer files are present.
+    # Also, we need to make sure the config.json has the correct model_type
+    
     print("Converting to GGUF using llama.cpp...")
     
     # Define paths
