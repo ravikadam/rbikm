@@ -67,7 +67,7 @@ def main():
                    f"<|im_start|>user\n{instruction}\n{input}<|im_end|>\n" \
                    f"<|im_start|>assistant\n{output}<|im_end|>"
             texts.append(text)
-        return { "text" : texts, }
+        return texts
 
     # Training Arguments
     training_args = TrainingArguments(
