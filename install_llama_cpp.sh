@@ -2,7 +2,7 @@
 set -e
 
 echo "Installing dependencies..."
-apt-get update && apt-get install -y build-essential cmake git
+apt-get update && apt-get install -y build-essential cmake git libcurl4-openssl-dev
 
 echo "Cloning llama.cpp..."
 if [ -d "llama.cpp" ]; then
@@ -14,9 +14,9 @@ else
     cd llama.cpp
 fi
 
-echo "Building llama.cpp..."
-make clean
-make all -j$(nproc)
+echo "Building llama.cpp with CMake..."
+cmake -B build -DGGML_CUDA=ON
+cmake --build build --config Release -j$(nproc)
 
 echo "llama.cpp installation complete!"
 cd ..
