@@ -26,6 +26,15 @@ echo "Creating Modelfile..."
 cat <<EOF > Modelfile
 FROM ./$GGUF_FILE
 SYSTEM "You are a helpful financial assistant trained on RBI reports."
+TEMPLATE """{{ if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{ if .Prompt }}<|im_start|>user
+{{ .Prompt }}<|im_end|>
+{{ end }}<|im_start|>assistant
+{{ .Response }}<|im_end|>
+"""
+PARAMETER stop "<|im_start|>"
+PARAMETER stop "<|im_end|>"
 PARAMETER temperature 0.7
 EOF
 
