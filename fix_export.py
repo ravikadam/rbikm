@@ -9,8 +9,8 @@ from transformers import AutoTokenizer
 model_path = "lora_model"
 merged_model_dir = "merged_model"
 llama_cpp_dir = "llama.cpp"
-output_gguf = "qwen3_8b_finetuned.gguf"
-quantized_gguf = "qwen3_8b_finetuned-Q4_K_M.gguf"
+output_gguf = "qwen2.5_7b_finetuned.gguf"
+quantized_gguf = "qwen2.5_7b_finetuned-Q4_K_M.gguf"
 
 def main():
     print("=== Starting Robust Export Fix ===")
