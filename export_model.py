@@ -25,10 +25,17 @@ def main():
     print("Saving tokenizer to 'merged_model'...")
     tokenizer.save_pretrained("merged_model")
 
-    # Qwen uses tokenizer.json, but sometimes convert_hf_to_gguf looks for tokenizer.model
-    # We will ensure all tokenizer files are present.
-    # Also, we need to make sure the config.json has the correct model_type
-    
+    # DEBUG: List files in merged_model
+    print("Files in merged_model:")
+    import os
+    print(os.listdir("merged_model"))
+
+    # Fix for Qwen tokenizer: Ensure it doesn't look like SentencePiece
+    # If tokenizer.model exists but it's not needed, rename it.
+    if os.path.exists("merged_model/tokenizer.model"):
+        print("Renaming tokenizer.model to avoid confusion...")
+        os.rename("merged_model/tokenizer.model", "merged_model/tokenizer.model.bak")
+
     print("Converting to GGUF using llama.cpp...")
     
     # Define paths
@@ -45,7 +52,12 @@ def main():
         f"{llama_cpp_dir}/convert_hf_to_gguf.py", 
         merged_model_dir, 
         "--outfile", output_gguf,
-        "--outtype", "f16"
+        "--outtype", "f16",
+        # Force BPE tokenizer for Qwen
+        # "--vocab-type", "bpe" # Sometimes auto-detection fails, but let's try without first if it was failing before. 
+        # Actually, Qwen uses a specific BPE. Let's try to trust the script but maybe the vocab files are still wrong.
+        # Let's try to use the 'qwen' specific conversion if available or just ensure tokenizer.json is used.
+        # The script usually auto-detects based on tokenizer.json.
     ]
     
     print(f"Running: {' '.join(convert_cmd)}")
