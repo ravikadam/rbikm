@@ -53,7 +53,8 @@ def main():
         per_device_train_batch_size = 2,
         gradient_accumulation_steps = 4,
         warmup_steps = 5,
-        max_steps = 60, # Set to -1 for full epochs, or a small number for testing
+        # max_steps = 60, # Removed to use epochs
+        num_train_epochs = 3, # Set to 3 epochs for better quality
         learning_rate = 2e-4,
         fp16 = not torch.cuda.is_bf16_supported(),
         bf16 = torch.cuda.is_bf16_supported(),
@@ -66,12 +67,32 @@ def main():
         report_to = "wandb", # Enable wandb tracking
     )
 
+    alpaca_prompt = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+
+### Instruction:
+{}
+
+### Input:
+{}
+
+### Response:
+{}"""
+
+    def formatting_prompts_func(examples):
+        instructions = examples["instruction"]
+        inputs       = examples["input"]
+        outputs      = examples["output"]
+        texts = []
+        for instruction, input, output in zip(instructions, inputs, outputs):
+            text = alpaca_prompt.format(instruction, input, output) + tokenizer.eos_token
+            texts.append(text)
+        return { "text" : texts, }
+
     trainer = SFTTrainer(
         model = model,
         tokenizer = tokenizer,
         train_dataset = dataset,
-        dataset_text_field = "text", # Unsloth handles formatting automatically if using standard formats? 
-        # Actually for Alpaca format we need a formatting function
+        dataset_text_field = "text",
         max_seq_length = max_seq_length,
         dataset_num_proc = 2,
         packing = False, # Can make training 5x faster for short sequences.
@@ -88,26 +109,6 @@ def main():
     tokenizer.save_pretrained("lora_model")
     print("Model saved to lora_model")
 
-alpaca_prompt = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
-
-### Instruction:
-{}
-
-### Input:
-{}
-
-### Response:
-{}"""
-
-def formatting_prompts_func(examples):
-    instructions = examples["instruction"]
-    inputs       = examples["input"]
-    outputs      = examples["output"]
-    texts = []
-    for instruction, input, output in zip(instructions, inputs, outputs):
-        text = alpaca_prompt.format(instruction, input, output) + tokenizer.eos_token
-        texts.append(text)
-    return { "text" : texts, }
 
 if __name__ == "__main__":
     main()
