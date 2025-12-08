@@ -33,7 +33,11 @@ EOF
 echo "Creating model '$MODEL_NAME'..."
 ollama create $MODEL_NAME -f Modelfile
 
-# 5. Run Model
-echo "Running model '$MODEL_NAME'..."
+# 5. Run Finetuned Model
+echo "Running finetuned model '$MODEL_NAME'..."
 echo "Type /bye to exit."
 ollama run $MODEL_NAME
+
+# Optional: Run base model for comparison
+# echo "Running base model (qwen2.5:7b)..."
+# ollama run qwen2.5:7b
