@@ -17,7 +17,7 @@ load_in_4bit = True # Use 4bit quantization to reduce memory usage. Can be False
 os.environ["WANDB_PROJECT"] = "qwen3-8b-finetune-rbi" 
 os.environ["WANDB_LOG_MODEL"] = "checkpoint"  # Log checkpoints to wandb
 
-model_name = "Qwen/Qwen3-8B"
+model_name = "Qwen/Qwen2.5-7B-Instruct" # Use Instruct version for better chat performance
 
 def main():
     print(f"Loading model: {model_name}")
@@ -26,54 +26,10 @@ def main():
         max_seq_length = max_seq_length,
         dtype = dtype,
         load_in_4bit = load_in_4bit,
-    )
-
-    # Do model patching and add LoRA adapters
-    model = FastLanguageModel.get_peft_model(
-        model,
-        r = 16,
-        target_modules = ["q_proj", "k_proj", "v_proj", "o_proj",
-                          "gate_proj", "up_proj", "down_proj",],
-        lora_alpha = 16,
-        lora_dropout = 0, # Supports any, but = 0 is optimized
-        bias = "none",    # Supports any, but = "none" is optimized
-        use_gradient_checkpointing = "unsloth", # True or "unsloth" for very long context
-        random_state = 3407,
-        max_seq_length = max_seq_length,
-        use_rslora = False,  # We support rank stabilized LoRA
-        loftq_config = None, # And LoftQ
-    )
-
     # Load Dataset
     dataset = load_dataset("json", data_files="finetune_dataset.json", split="train")
     print(f"Loaded dataset with {len(dataset)} samples")
 
-    # Training Arguments
-    training_args = TrainingArguments(
-        per_device_train_batch_size = 2,
-        gradient_accumulation_steps = 4,
-        warmup_steps = 5,
-        # max_steps = 60, # Removed to use epochs
-        num_train_epochs = 3, # Set to 3 epochs for better quality
-        learning_rate = 2e-4,
-        fp16 = not torch.cuda.is_bf16_supported(),
-        bf16 = torch.cuda.is_bf16_supported(),
-        logging_steps = 1,
-        optim = "adamw_8bit",
-        weight_decay = 0.01,
-        lr_scheduler_type = "linear",
-        seed = 3407,
-        output_dir = "outputs",
-        report_to = "wandb", # Enable wandb tracking
-    )
-
-    alpaca_prompt = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
-
-### Instruction:
-{}
-
-### Input:
-{}
 
 ### Response:
 {}"""
