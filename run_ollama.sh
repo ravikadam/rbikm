@@ -36,6 +36,8 @@ TEMPLATE """{{ if .System }}<|im_start|>system
 PARAMETER stop "<|im_start|>"
 PARAMETER stop "<|im_end|>"
 PARAMETER temperature 0.7
+PARAMETER top_k 40
+PARAMETER top_p 0.9
 EOF
 
 # 4. Create Model
