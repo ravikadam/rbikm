@@ -86,7 +86,7 @@ def main():
         for instruction, input, output in zip(instructions, inputs, outputs):
             text = alpaca_prompt.format(instruction, input, output) + tokenizer.eos_token
             texts.append(text)
-        return { "text" : texts, }
+        return texts
 
     trainer = SFTTrainer(
         model = model,
