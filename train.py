@@ -4,6 +4,9 @@ from trl import SFTTrainer
 from transformers import TrainingArguments
 from datasets import load_dataset
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Configuration
 max_seq_length = 2048 # Choose any! We auto support RoPE Scaling internally!

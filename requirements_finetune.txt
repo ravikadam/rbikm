@@ -3,3 +3,4 @@ wandb
 datasets
 trl
 transformers>=4.51.0
+python-dotenv
