@@ -25,14 +25,12 @@ pip install --upgrade pip
 # 3. Install Python Requirements
 echo "Installing Python dependencies..."
 
-# CRITICAL: Install PyTorch 2.4.0 specifically. Unsloth is not yet compatible with 2.5.0.
-echo "Installing PyTorch 2.4.0..."
-pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121
-
-# Install Unsloth (Specific version compatible with Torch 2.4.0)
-echo "Installing Unsloth..."
-# We use the specific package for cu121 and torch240
-pip install "unsloth[cu121-torch240] @ git+https://github.com/unslothai/unsloth.git"
+# CRITICAL: Install PyTorch 2.4.0 and Unsloth TOGETHER to prevent pip from upgrading Torch to 2.4.1
+echo "Installing PyTorch 2.4.0 and Unsloth..."
+pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 \
+    "unsloth[cu121-torch240] @ git+https://github.com/unslothai/unsloth.git" \
+    --index-url https://download.pytorch.org/whl/cu121 \
+    --extra-index-url https://pypi.org/simple
 
 # Install other requirements
 if [ -f "requirements.txt" ]; then
