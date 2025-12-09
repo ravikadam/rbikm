@@ -2,7 +2,7 @@
 set -e
 
 # Configuration
-FINETUNED_MODEL_NAME="qwen3-8b-rbi" # Keeping the name as per user's current setup
+FINETUNED_MODEL_NAME="qwen2.5-7b-rbi" # Updated to reflect Qwen 2.5
 BASE_MODEL_NAME="qwen2.5:7b-instruct" # Using the instruct version of base model for fair comparison
 
 echo "=== Setting up Ollama for Model Serving ==="

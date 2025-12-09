@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-MODEL_NAME="qwen3-8b-rbi"
-GGUF_FILE="qwen3_8b_finetuned-Q4_K_M.gguf"
+MODEL_NAME="qwen2.5-7b-rbi"
+GGUF_FILE="qwen2.5_7b_finetuned-Q4_K_M.gguf"
 
 # 1. Install Ollama if not present
 if ! command -v ollama &> /dev/null; then

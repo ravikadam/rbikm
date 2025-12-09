@@ -2,7 +2,7 @@ import requests
 import json
 
 # Configuration
-FINETUNED_MODEL = "qwen3-8b-rbi"
+FINETUNED_MODEL = "qwen2.5-7b-rbi"
 BASE_MODEL = "qwen2.5:7b-instruct"
 API_URL = "http://localhost:11434/api/generate"
 
