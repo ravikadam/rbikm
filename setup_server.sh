@@ -21,8 +21,8 @@ pip install --upgrade pip
 
 # 3. Install Python Requirements
 echo "Installing Python dependencies..."
-# Install PyTorch first (Unsloth needs it) - assuming CUDA 12.1 or similar compatible
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# Install PyTorch 2.4.0 (Required for Unsloth)
+pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 
 # Install Unsloth (Robust install)
 echo "Installing Unsloth..."
