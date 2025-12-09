@@ -23,6 +23,11 @@ source venv/bin/activate
 echo "Upgrading pip, setuptools, and wheel..."
 pip install --upgrade pip setuptools wheel
 
+# Pre-install critical build dependencies to prevent backtracking to ancient versions
+# This forces pip to use modern versions of these packages, avoiding build errors with old ones
+echo "Pre-installing critical dependencies..."
+pip install "MarkupSafe>=2.1.5" "jinja2>=3.1.4"
+
 # 3. Install Python Requirements
 echo "Installing Unsloth and dependencies (Auto-resolving latest compatible versions)..."
 
