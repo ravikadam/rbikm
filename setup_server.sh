@@ -26,11 +26,13 @@ pip install --upgrade pip
 echo "Installing Python dependencies..."
 
 # CRITICAL: Install PyTorch 2.4.0 and Unsloth TOGETHER to prevent pip from upgrading Torch to 2.4.1
-# We also pin sympy>=1.12 to prevent pip from backtracking to ancient versions incompatible with Py3.10
-echo "Installing PyTorch 2.4.0, Unsloth, and SymPy..."
+# We also pin sympy, networkx, and decorator to prevent pip from backtracking to ancient broken versions
+echo "Installing PyTorch 2.4.0, Unsloth, and dependencies..."
 pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 \
     "unsloth[cu121-torch240] @ git+https://github.com/unslothai/unsloth.git" \
     "sympy>=1.12" \
+    "networkx>=2.8" \
+    "decorator>=5.1.1" \
     --index-url https://download.pytorch.org/whl/cu121 \
     --extra-index-url https://pypi.org/simple
 
