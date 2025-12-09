@@ -23,17 +23,17 @@ source venv/bin/activate
 echo "Upgrading pip, setuptools, and wheel..."
 pip install --upgrade pip setuptools wheel
 
-# Pre-install critical build dependencies to prevent backtracking to ancient versions
-# This forces pip to use modern versions of these packages, avoiding build errors with old ones
-echo "Pre-installing critical dependencies..."
-pip install "MarkupSafe>=2.1.5" "jinja2>=3.1.4"
-
 # 3. Install Python Requirements
 echo "Installing Unsloth and dependencies (Auto-resolving latest compatible versions)..."
-
-# We install unsloth with the cu121 extra, allowing it to determine the best torch version.
-# We do NOT manually pin torch or other libs, trusting pip's solver to find the latest compatible set.
-pip install "unsloth[cu121] @ git+https://github.com/unslothai/unsloth.git"
+# We pass constraints DIRECTLY to the install command to prevent pip from backtracking to ancient broken versions.
+# This ensures we get the "latest" versions that actually work, without checking 10-year-old packages.
+pip install --upgrade --no-cache-dir \
+    "unsloth[cu121] @ git+https://github.com/unslothai/unsloth.git" \
+    "MarkupSafe>=2.1.5" \
+    "jinja2>=3.1.4" \
+    "networkx>=2.8" \
+    "torch>=2.4.0" \
+    "sympy>=1.12"
 
 # Install other requirements
 if [ -f "requirements.txt" ]; then
