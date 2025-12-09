@@ -24,15 +24,18 @@ echo "Upgrading pip, setuptools, and wheel..."
 pip install --upgrade pip setuptools wheel
 
 # CRITICAL: Install PyTorch 2.4.0 and Unsloth TOGETHER to prevent pip from upgrading Torch to 2.4.1
-# We also pin sympy, networkx, decorator, jinja2, and MarkupSafe to prevent pip from backtracking to ancient broken versions
+# We use --upgrade to ensure we get the latest compatible versions of dependencies (like jinja2, sympy)
+# We explicitly pin known problematic packages to prevent backtracking to ancient versions
 echo "Installing PyTorch 2.4.0, Unsloth, and dependencies..."
-pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 \
+pip install --upgrade \
+    torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 \
     "unsloth[cu121-torch240] @ git+https://github.com/unslothai/unsloth.git" \
     "sympy>=1.12" \
     "networkx>=2.8" \
     "decorator>=5.1.1" \
     "jinja2>=3.1.0" \
     "MarkupSafe>=2.1.0" \
+    "protobuf>=3.20" \
     --index-url https://download.pytorch.org/whl/cu121 \
     --extra-index-url https://pypi.org/simple
 
