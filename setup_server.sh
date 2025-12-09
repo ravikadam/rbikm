@@ -19,31 +19,16 @@ echo "Setting up Python environment..."
 python3 -m venv venv
 source venv/bin/activate
 
-# Upgrade build tools first to avoid build issues with older packages
+# Upgrade build tools
 echo "Upgrading pip, setuptools, and wheel..."
 pip install --upgrade pip setuptools wheel
 
-# CRITICAL: Install PyTorch 2.4.0 and Unsloth TOGETHER to prevent pip from upgrading Torch to 2.4.1
-# We use --upgrade to ensure we get the latest compatible versions of dependencies
-# We explicitly pin MANY packages to prevent pip from backtracking to ancient versions (resolution too deep)
-echo "Installing PyTorch 2.4.0, Unsloth, and dependencies..."
-pip install --upgrade \
-    torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 \
-    "unsloth[cu121-torch240] @ git+https://github.com/unslothai/unsloth.git" \
-    "sympy>=1.12" \
-    "networkx>=2.8" \
-    "decorator>=5.1.1" \
-    "jinja2>=3.1.0" \
-    "MarkupSafe>=2.1.0" \
-    "protobuf>=3.20" \
-    "filelock>=3.13.0" \
-    "fsspec>=2024.0.0" \
-    "transformers>=4.40.0" \
-    "accelerate>=0.30.0" \
-    "peft>=0.11.0" \
-    "bitsandbytes>=0.43.0" \
-    --index-url https://download.pytorch.org/whl/cu121 \
-    --extra-index-url https://pypi.org/simple
+# 3. Install Python Requirements
+echo "Installing Unsloth and dependencies (Auto-resolving latest compatible versions)..."
+
+# We install unsloth with the cu121 extra, allowing it to determine the best torch version.
+# We do NOT manually pin torch or other libs, trusting pip's solver to find the latest compatible set.
+pip install "unsloth[cu121] @ git+https://github.com/unslothai/unsloth.git"
 
 # Install other requirements
 if [ -f "requirements.txt" ]; then
