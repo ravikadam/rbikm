@@ -24,26 +24,19 @@ echo "Upgrading pip, setuptools, and wheel..."
 pip install --upgrade pip setuptools wheel
 
 # 3. Install Python Requirements
-echo "Installing Unsloth and dependencies (Auto-resolving latest compatible versions)..."
-# We pass constraints DIRECTLY to the install command to prevent pip from backtracking to ancient broken versions.
-# This ensures we get the "latest" versions that actually work, without checking 10-year-old packages.
-pip install --upgrade --no-cache-dir \
-    "unsloth[cu121] @ git+https://github.com/unslothai/unsloth.git" \
-    "MarkupSafe>=2.1.5" \
-    "jinja2>=3.1.4" \
-    "networkx>=2.8" \
-    "torch>=2.4.0" \
-    "sympy>=1.12"
+# 3. Install Python Requirements
+echo "Installing Python dependencies from requirements files..."
 
-# Install other requirements
+# Install base requirements
 if [ -f "requirements.txt" ]; then
+    echo "Installing requirements.txt..."
     pip install -r requirements.txt
 fi
+
+# Install finetuning requirements
 if [ -f "requirements_finetune.txt" ]; then
-    # Exclude unsloth from requirements file if it's there to avoid overwriting/conflicts
-    grep -v "unsloth" requirements_finetune.txt > requirements_finetune_clean.txt
-    pip install -r requirements_finetune_clean.txt
-    rm requirements_finetune_clean.txt
+    echo "Installing requirements_finetune.txt..."
+    pip install -r requirements_finetune.txt
 fi
 
 # 4. Build llama.cpp
